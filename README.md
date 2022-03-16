@@ -187,6 +187,33 @@ Following [this guide](https://docs.gitlab.com/ee/user/clusters/agent/install/in
   ```
 * [x] Added `KUBE_CONTEXT = youtube-tag-analyser/infrastructure-management:my-agent` environment variable to this project's CI/CD environment variables
 
+## Create the deployment
+
+* [x] Give the EKS cluster access to GitLab Container Registry (per [this guide](https://chris-vermeulen.com/using-gitlab-registry-with-kubernetes/))
+  ```bash
+  kubectl create secret docker-registry registry-credentials \
+    --docker-server=https://registry.gitlab.com \
+    --docker-username=REGISTRY_USERNAME \
+    --docker-password=REGISTRY_PASSWORD \
+    --docker-email=REGISTRY_EMAIL
+  kubectl patch serviceaccount default -p '{"imagePullSecrets": [{"name": "registry-credentials"}]}'
+  ```
+* [x] Create Fargate profile for the main YTTA Application
+  ```bash
+  aws eks create-fargate-profile \
+    --fargate-profile-name ytta-app-profile \
+    --cluster-name my-cluster \
+    --pod-execution-role-arn "arn:aws:iam::407298002065:role/myAmazonEKSFargatePodExecutionRole" \
+    --subnets "subnet-0a94e6620791955ce" "subnet-0e7c5b86f2f9ca0b6" \
+    --selectors namespace=ytta-app
+  ```
+* [x] Create namespace
+  ```bash
+  kubectl create namespace ytta-app
+  ```
+* [ ] Deploy with GitLab CI/CD, see [config](https://gitlab.com/youtube-tag-analyser/ytta-app/-/blob/main/.gitlab-ci.yml) for how this is done
+
+
 ## Other resources
 
 * [Creating AWS Admin IAM user](https://docs.aws.amazon.com/IAM/latest/UserGuide/getting-started_create-admin-group.html)
