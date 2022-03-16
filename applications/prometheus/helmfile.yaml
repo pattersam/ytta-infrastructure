@@ -7,6 +7,6 @@ releases:
   namespace: gitlab-managed-apps
   chart: stable/prometheus
   version: 10.4.1
-  installed: true
+  installed: false  # currently can't deploy this on Fargate because volumes aren't supported
   values:
     - values.yaml
