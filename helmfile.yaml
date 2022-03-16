@@ -17,7 +17,7 @@ helmDefaults:
 helmfiles:
 
 #  - path: applications/cilium/helmfile.yaml
-#  - path: applications/ingress/helmfile.yaml
+ - path: applications/ingress/helmfile.yaml
 #  - path: applications/cert-manager/helmfile.yaml
 #  - path: applications/sentry/helmfile.yaml
 #  - path: applications/gitlab-runner/helmfile.yaml
