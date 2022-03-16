@@ -1,4 +1,4 @@
 ci_access:
   projects:
   - id: youtube-tag-analyser/infrastructure-management
-  # - id: youtube-tag-analyser/app
+  - id: youtube-tag-analyser/ytta-app
