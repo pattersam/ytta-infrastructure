@@ -8,6 +8,7 @@ controller:
     prometheus.io/scrape: "true"
     prometheus.io/port: "10254"
 
+  # these may also be needed, per https://github.com/kubernetes/ingress-nginx/issues/4888
   # extraArgs:
   #   http-port: 8080
   #   https-port: 8443
