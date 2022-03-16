@@ -7,6 +7,6 @@ releases:
   namespace: gitlab-managed-apps
   chart: stable/nginx-ingress
   version: 1.40.2
-  installed: true
+  installed: false  # disabling while I'm not sure how to configure this correctly for Fargate (see values file)
   values:
     - values.yaml
