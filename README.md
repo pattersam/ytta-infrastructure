@@ -152,6 +152,32 @@ Following this [Getting started with Amazon EKS](https://docs.aws.amazon.com/eks
   ```
 
 
+## Installing the GitLab Agent
+
+Following [this guide](https://docs.gitlab.com/ee/user/clusters/agent/install/index.html)
+
+* [x] Created the `.gitlab/agents/my-agent/config.yaml` in this project
+* [x] Added `my-agent` to this project from the Infrastructure > Kubernetes clusters page
+* [x] Run the one-liner installation method
+  ```bash
+  docker run --pull=always --rm \
+    registry.gitlab.com/gitlab-org/cluster-integration/gitlab-agent/cli:stable generate \
+    --agent-token=... \
+    --kas-address=wss://kas.gitlab.com \
+    --agent-version stable \
+    --namespace gitlab-kubernetes-agent | kubectl apply -f -
+  ```
+* [x] Create Fargate profile for the GitLab Agent
+  ```bash
+  aws eks create-fargate-profile \
+    --fargate-profile-name gitlab-agent-profile \
+    --cluster-name my-cluster \
+    --pod-execution-role-arn "arn:aws:iam::407298002065:role/myAmazonEKSFargatePodExecutionRole" \
+    --subnets "subnet-0a94e6620791955ce" "subnet-0e7c5b86f2f9ca0b6" \
+    --selectors namespace=gitlab-kubernetes-agent
+  ```
+* [x] Added `KUBE_CONTEXT = youtube-tag-analyser/infrastructure-management:my-agent` environment variable to this project's CI/CD environment variables
+
 ## Other resources
 
 * [Creating AWS Admin IAM user](https://docs.aws.amazon.com/IAM/latest/UserGuide/getting-started_create-admin-group.html)
