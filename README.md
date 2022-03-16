@@ -176,6 +176,15 @@ Following [this guide](https://docs.gitlab.com/ee/user/clusters/agent/install/in
     --subnets "subnet-0a94e6620791955ce" "subnet-0e7c5b86f2f9ca0b6" \
     --selectors namespace=gitlab-kubernetes-agent
   ```
+* [x] (Optional) Create Fargate profile for the GitLab Managed Apps
+  ```bash
+  aws eks create-fargate-profile \
+    --fargate-profile-name gitlab-managed-apps-profile \
+    --cluster-name my-cluster \
+    --pod-execution-role-arn "arn:aws:iam::407298002065:role/myAmazonEKSFargatePodExecutionRole" \
+    --subnets "subnet-0a94e6620791955ce" "subnet-0e7c5b86f2f9ca0b6" \
+    --selectors namespace=gitlab-managed-apps
+  ```
 * [x] Added `KUBE_CONTEXT = youtube-tag-analyser/infrastructure-management:my-agent` environment variable to this project's CI/CD environment variables
 
 ## Other resources
