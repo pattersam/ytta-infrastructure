@@ -2,7 +2,6 @@ image:
   file: .gitpod.Dockerfile
 
 tasks:
-  - name: kubeconfig
-    command: |
+  - command: |
       aws eks update-kubeconfig --region eu-central-1 --name my-cluster
       kubectl get svc
