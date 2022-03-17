@@ -1,3 +1,6 @@
 aws/**
 awscliv2.zip
 kubectl
+README.md
+get_helm.sh
+dump
