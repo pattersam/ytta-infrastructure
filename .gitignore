@@ -4,3 +4,5 @@ kubectl
 README.md
 get_helm.sh
 dump
+
+ytta-app-backend-deployment-with-secrets.yaml

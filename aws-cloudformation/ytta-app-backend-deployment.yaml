@@ -1,0 +1,36 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  creationTimestamp: null
+  labels:
+    app: ytta-app-server
+  name: ytta-app-server
+  namespace: ytta-app
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ytta-app-server
+  strategy: {}
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        app: ytta-app-server
+    spec:
+      containers:
+      - name: ytta-app
+        image: registry.gitlab.com/youtube-tag-analyser/ytta-app/backend:latest
+        ports:
+        - containerPort: 8000
+        env:
+        - name: FIRST_SUPERUSER
+          value: FIRST_SUPERUSER_VALUE
+        - name: FIRST_SUPERUSER_PASSWORD
+          value: FIRST_SUPERUSER_PASSWORD_VALUE
+        - name: POSTGRES_SERVER
+          value: POSTGRES_SERVER_VALUE
+        - name: POSTGRES_PASSWORD
+          value: POSTGRES_PASSWORD_VALUE
+        resources: {}
+status: {}
