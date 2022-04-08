@@ -300,8 +300,25 @@ As per [this guide](https://docs.aws.amazon.com/eks/latest/userguide/aws-load-ba
   kubectl apply -f aws-cloudformation/ingress.yaml
   ```
 
+## SQS Queues
 
+### Queues for Celery workers
+
+Create these manually
+
+* `ytta-celery`
+* `ytta-celery-cicd`
+
+With settings
+
+* Default visibility timeout = 5 Minutes
+* Message retention period = 1 Minute
 
 ## Other resources
 
 * [Creating AWS Admin IAM user](https://docs.aws.amazon.com/IAM/latest/UserGuide/getting-started_create-admin-group.html)
+
+## Useful commands
+
+* Show pods: `kubectl -n ytta-app get pods`
+* Show pod logs: `kubectl -n ytta-app logs {POD_NAME}`
