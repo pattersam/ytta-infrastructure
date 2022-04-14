@@ -307,7 +307,7 @@ As per [this guide](https://docs.aws.amazon.com/eks/latest/userguide/aws-load-ba
 * Wait for **Registered targets** in the new **Target group** to be **healthy**
 * [x] Create **Ingress** (application load balancing)
   ```bash
-  kubectl apply -f manifests/ingress.yaml
+  kubectl apply -f charts/ytta/templates/backend-ingress-api.yaml
   ```
 
 ## SQS Queues
@@ -317,6 +317,7 @@ As per [this guide](https://docs.aws.amazon.com/eks/latest/userguide/aws-load-ba
 Create these manually
 
 * `ytta-celery`
+* `ytta-celery-test`
 * `ytta-celery-cicd`
 
 With settings
@@ -332,10 +333,46 @@ With settings
 
 * Show pods: `kubectl -n ytta-prod get pods`
 * Show pod logs: `kubectl -n ytta-prod logs {POD_NAME}`
+* Run a shell in a pod: `kubectl -n ytta-prod exec -it api-567f8d56f7-8g9d7 -- /bin/bash`
 * Create heml chart: `heml create charts/ytta/`
 * Lint heml chart: `helm lint charts/ytta/`
 * **DRY RUN** Install ytta using helm: `helm install --dry-run ytta charts/ytta --namespace ytta-prod`
 * Install ytta using helm: `helm install ytta charts/ytta --namespace ytta-prod`
 * Template ytta using helmfile: `helmfile --file applications/ytta/helmfile.yaml template`
 * Install ytta using helmfile: `helmfile --file applications/ytta/helmfile.yaml apply --suppress-secrets`
-* Restart a deployment: `kubectl rollout restart -n ytta-prod deployment api`
+* Restart a deployment: `kubectl rollout restart -n ytta-prod deployment api celery-worker ui`
+
+## New instructions
+
+Create namespace
+
+```bash
+kubectl create namespace ytta-prod
+```
+
+Create Fargate profile
+
+```bash
+aws eks create-fargate-profile \
+  --fargate-profile-name ytta-profile \
+  --cluster-name my-cluster \
+  --pod-execution-role-arn "arn:aws:iam::407298002065:role/myAmazonEKSFargatePodExecutionRole" \
+  --subnets "subnet-0a94e6620791955ce" "subnet-0e7c5b86f2f9ca0b6" \
+  --selectors namespace=ytta-prod
+```
+
+Create secret for k8s to access GitLab Container Registry
+
+```bash
+kubectl -n ytta-prod create secret docker-registry registry-credentials \
+  --docker-server=https://registry.gitlab.com \
+  --docker-username=REGISTRY_USERNAME \
+  --docker-password=REGISTRY_PASSWORD
+kubectl -n ytta-prod patch serviceaccount default -p '{"imagePullSecrets": [{"name": "registry-credentials"}]}'
+```
+
+Deploy
+
+```bash
+helmfile --file applications/ytta/helmfile.yaml apply --suppress-secrets
+```

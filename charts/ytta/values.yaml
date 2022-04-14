@@ -4,7 +4,8 @@ uiName: ui
 
 image:
   name: ytta-app
-  repository: registry.gitlab.com/youtube-tag-analyser/ytta-app/backend
+  backendRepository: registry.gitlab.com/youtube-tag-analyser/ytta-app/backend
+  frontendRepository: registry.gitlab.com/youtube-tag-analyser/ytta-app/frontend
   tag: latest
 
 env:          
