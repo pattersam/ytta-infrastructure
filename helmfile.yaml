@@ -16,6 +16,7 @@ helmDefaults:
 
 helmfiles:
 
+ - path: applications/ytta/helmfile.yaml
 #  - path: applications/cilium/helmfile.yaml
  - path: applications/ingress/helmfile.yaml
 #  - path: applications/cert-manager/helmfile.yaml

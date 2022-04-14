@@ -1,0 +1,32 @@
+apiName: api
+celeryWorkerName: celery-worker
+uiName: ui
+
+image:
+  name: ytta-app
+  repository: registry.gitlab.com/youtube-tag-analyser/ytta-app/backend
+  tag: latest
+
+env:          
+  FIRST_SUPERUSER: ""
+  FIRST_SUPERUSER_PASSWORD: ""
+  POSTGRES_SERVER: ""
+  POSTGRES_PASSWORD: ""
+  AWS_ACCOUNT_ID: ""
+  AWS_ACCESS_KEY_ID: ""
+  AWS_SECRET_ACCESS_KEY: ""
+  AWS_DEFAULT_REGION: ""
+  SQS_URL: ""
+
+service:
+  type: LoadBalancer
+  port: 80
+  annotations:
+    service.beta.kubernetes.io/aws-load-balancer-type: external
+    service.beta.kubernetes.io/aws-load-balancer-nlb-target-type: ip
+
+ingress:
+  className: alb
+  annotations:
+    alb.ingress.kubernetes.io/scheme: internet-facing
+    alb.ingress.kubernetes.io/target-type: ip

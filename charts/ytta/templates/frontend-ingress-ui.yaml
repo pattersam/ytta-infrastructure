@@ -1,0 +1,21 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: {{ .Values.uiName | required "uiName required" }}
+  namespace: {{ .Release.Namespace | required "namespace required" }}
+  annotations:
+  {{- toYaml .Values.ingress.annotations | nindent 4}}
+  labels:
+    app: {{ .Values.uiName | required "uiName required" }}
+spec:
+  ingressClassName: {{ .Values.ingress.className }}
+  rules:
+    - http:
+        paths:
+        - path: /
+          pathType: Prefix
+          backend:
+            service:
+              name: {{ .Values.uiName | required "uiName required" }}
+              port:
+                number: {{ .Values.service.port }}
