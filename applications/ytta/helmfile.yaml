@@ -1,0 +1,26 @@
+releases:
+  - name: ytta
+    namespace: ytta-prod
+    chart: ../../charts/ytta
+    values:
+      - ../../charts/ytta/values.yaml
+      - values.yaml
+    set:
+      - name: env.FIRST_SUPERUSER
+        value: {{ requiredEnv "FIRST_SUPERUSER" }}
+      - name: env.FIRST_SUPERUSER_PASSWORD
+        value: {{ requiredEnv "FIRST_SUPERUSER_PASSWORD" }}
+      - name: env.POSTGRES_SERVER
+        value: {{ requiredEnv "POSTGRES_SERVER" }}
+      - name: env.POSTGRES_PASSWORD
+        value: {{ requiredEnv "POSTGRES_PASSWORD" }}
+      - name: env.AWS_ACCOUNT_ID
+        value: {{ requiredEnv "AWS_ACCOUNT_ID" }}
+      - name: env.AWS_ACCESS_KEY_ID
+        value: {{ requiredEnv "AWS_ACCESS_KEY_ID" }}
+      - name: env.AWS_SECRET_ACCESS_KEY
+        value: {{ requiredEnv "AWS_SECRET_ACCESS_KEY" }}
+      - name: env.AWS_DEFAULT_REGION
+        value: {{ requiredEnv "AWS_DEFAULT_REGION" }}
+      - name: env.SQS_URL
+        value: {{ requiredEnv "SQS_URL" }}

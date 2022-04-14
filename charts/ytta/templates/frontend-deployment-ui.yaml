@@ -1,0 +1,25 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Values.uiName | required "uiName required" }}
+  namespace: {{ .Release.Namespace | required "namespace required" }}
+  labels:
+    app: {{ .Values.uiName | required "uiName required" }}
+  creationTimestamp: null
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: {{ .Values.uiName | required "uiName required" }}
+  template:
+    metadata:
+      labels:
+        app: {{ .Values.uiName | required "uiName required" }}
+      creationTimestamp: null
+    spec:
+      containers:
+        - name: {{ .Values.image.name | required "image name required" }}
+          image: "{{ .Values.image.frontendRepository }}:{{ .Values.image.tag }}"
+          ports:
+            - containerPort: 80
+status: {}

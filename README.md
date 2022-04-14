@@ -70,6 +70,16 @@ Fluentd can be deployed as a central service to forward syslog messages to SIEM:
   chmod 700 get_helm.sh
   ./get_helm.sh
   ```
+* Install `helm-diff` plugin
+  ```bash
+  helm plugin install https://github.com/databus23/helm-diff
+  ```
+* Install `helmfile`
+  ```bash
+  wget https://github.com/roboll/helmfile/releases/download/v0.143.1/helmfile_linux_amd64 -O helmfile_linux_amd64
+  chmod +x helmfile_linux_amd64
+  mv helmfile_linux_amd64 $HOME/bin/helmfile
+  ```
 
 ## Setting up Amazon EKS
 
@@ -82,13 +92,13 @@ Following this [Getting started with Amazon EKS](https://docs.aws.amazon.com/eks
   aws cloudformation create-stack \
     --region eu-central-1 \
     --stack-name my-eks-vpc-stack \
-    --template-body file://"aws-cloudformation/amazon-eks-vpc-private-subnets.yaml"
+    --template-body file://"manifests/amazon-eks-vpc-private-subnets.yaml"
   ```
 * [x] Create a cluster IAM role
   ```bash
   aws iam create-role \
     --role-name myAmazonEKSClusterRole \
-    --assume-role-policy-document file://"aws-cloudformation/cluster-role-trust-policy.json"
+    --assume-role-policy-document file://"manifests/cluster-role-trust-policy.json"
   ```
 * [x] Attach the required EKS IAM policy to the role
   ```bash
@@ -119,7 +129,7 @@ Following this [Getting started with Amazon EKS](https://docs.aws.amazon.com/eks
   ```bash
   aws iam create-role \
     --role-name myAmazonEKSFargatePodExecutionRole \
-    --assume-role-policy-document file://"aws-cloudformation/pod-execution-role-trust-policy.json"
+    --assume-role-policy-document file://"manifests/pod-execution-role-trust-policy.json"
   ```
 * [x] Attach the required Amazon EKS managed IAM policy to the role.
   ```bash
@@ -200,12 +210,12 @@ As per [this guide](https://docs.aws.amazon.com/eks/latest/userguide/aws-load-ba
 * [x] Create an IAM OIDC provider for your cluster [following this guide](https://docs.aws.amazon.com/eks/latest/userguide/enable-iam-roles-for-service-accounts.html)
 * [x] Create the IAM Policy
   ```bash
-  curl -o aws-cloudformation/iam_policy.json https://raw.githubusercontent.com/kubernetes-sigs/aws-load-balancer-controller/v2.4.0/docs/install/iam_policy.json
+  curl -o manifests/iam_policy.json https://raw.githubusercontent.com/kubernetes-sigs/aws-load-balancer-controller/v2.4.0/docs/install/iam_policy.json
   aws iam create-policy \
     --policy-name AWSLoadBalancerControllerIAMPolicy \
-    --policy-document file://aws-cloudformation/iam_policy.json
+    --policy-document file://manifests/iam_policy.json
   ```
-* [x] Get the oidc and populate aws-cloudformation/load-balancer-role-trust-policy.json
+* [x] Get the oidc and populate manifests/load-balancer-role-trust-policy.json
   ```bash
   aws eks describe-cluster --name my-cluster --query "cluster.identity.oidc.issuer" --output text
   ```
@@ -213,7 +223,7 @@ As per [this guide](https://docs.aws.amazon.com/eks/latest/userguide/aws-load-ba
   ```bash
   aws iam create-role \
     --role-name AmazonEKSLoadBalancerControllerRole \
-    --assume-role-policy-document file://"aws-cloudformation/load-balancer-role-trust-policy.json"
+    --assume-role-policy-document file://"manifests/load-balancer-role-trust-policy.json"
   ```
 * [x] Attach the required Amazon EKS managed IAM policy to the IAM role
   ```bash
@@ -223,7 +233,7 @@ As per [this guide](https://docs.aws.amazon.com/eks/latest/userguide/aws-load-ba
   ```
 * [x] Create a service account
   ```bash
-  kubectl apply -f aws-cloudformation/aws-load-balancer-controller-service-account.yaml
+  kubectl apply -f manifests/aws-load-balancer-controller-service-account.yaml
   kubectl annotate serviceaccount -n kube-system aws-load-balancer-controller \
     eks.amazonaws.com/sts-regional-endpoints=true
   ```
@@ -265,39 +275,39 @@ As per [this guide](https://docs.aws.amazon.com/eks/latest/userguide/aws-load-ba
 
 * [x] Create namespace
   ```bash
-  kubectl create namespace ytta-app
+  kubectl create namespace ytta-prod
   ```
-* [x] Give the EKS cluster's `ytta-app` namespace access to GitLab Container Registry (per [this guide](https://chris-vermeulen.com/using-gitlab-registry-with-kubernetes/))
+* [x] Give the EKS cluster's `ytta-prod` namespace access to GitLab Container Registry (per [this guide](https://chris-vermeulen.com/using-gitlab-registry-with-kubernetes/))
   ```bash
-  kubectl -n ytta-app create secret docker-registry registry-credentials \
+  kubectl -n ytta-prod create secret docker-registry registry-credentials \
     --docker-server=https://registry.gitlab.com \
     --docker-username=REGISTRY_USERNAME \
     --docker-password=REGISTRY_PASSWORD \
     --docker-email=REGISTRY_EMAIL
-  kubectl -n ytta-app patch serviceaccount default -p '{"imagePullSecrets": [{"name": "registry-credentials"}]}'
+  kubectl -n ytta-prod patch serviceaccount default -p '{"imagePullSecrets": [{"name": "registry-credentials"}]}'
   ```
 * [x] Create Fargate profile for the main YTTA Application
   ```bash
   aws eks create-fargate-profile \
-    --fargate-profile-name ytta-app-profile \
+    --fargate-profile-name ytta-profile \
     --cluster-name my-cluster \
     --pod-execution-role-arn "arn:aws:iam::407298002065:role/myAmazonEKSFargatePodExecutionRole" \
     --subnets "subnet-0a94e6620791955ce" "subnet-0e7c5b86f2f9ca0b6" \
-    --selectors namespace=ytta-app
+    --selectors namespace=ytta-prod
   ```
-* [x] Deploy with GitLab CI/CD, see [config](https://gitlab.com/youtube-tag-analyser/ytta-app/-/blob/main/.gitlab-ci.yml) for how this is done
-* [x] Create a **Service** to access the `ytta-app`
+* [x] Deploy with GitLab CI/CD, see [config](https://gitlab.com/youtube-tag-analyser/ytta/-/blob/main/.gitlab-ci.yml) for how this is done
+* [x] Create a **Service** to access the `ytta`
   ```bash
-  kubectl apply -f aws-cloudformation/ytta-app-service.yaml
+  kubectl apply -f charts/ytta/templates/ytta-backend-service.yaml
   ```
 * [x] Check progress
   ```bash
-  kubectl -n ytta-app get all
+  kubectl -n ytta-prod get all
   ```
 * Wait for **Registered targets** in the new **Target group** to be **healthy**
 * [x] Create **Ingress** (application load balancing)
   ```bash
-  kubectl apply -f aws-cloudformation/ingress.yaml
+  kubectl apply -f charts/ytta/templates/backend-ingress-api.yaml
   ```
 
 ## SQS Queues
@@ -307,6 +317,7 @@ As per [this guide](https://docs.aws.amazon.com/eks/latest/userguide/aws-load-ba
 Create these manually
 
 * `ytta-celery`
+* `ytta-celery-test`
 * `ytta-celery-cicd`
 
 With settings
@@ -320,5 +331,48 @@ With settings
 
 ## Useful commands
 
-* Show pods: `kubectl -n ytta-app get pods`
-* Show pod logs: `kubectl -n ytta-app logs {POD_NAME}`
+* Show pods: `kubectl -n ytta-prod get pods`
+* Show pod logs: `kubectl -n ytta-prod logs {POD_NAME}`
+* Run a shell in a pod: `kubectl -n ytta-prod exec -it api-567f8d56f7-8g9d7 -- /bin/bash`
+* Create heml chart: `heml create charts/ytta/`
+* Lint heml chart: `helm lint charts/ytta/`
+* **DRY RUN** Install ytta using helm: `helm install --dry-run ytta charts/ytta --namespace ytta-prod`
+* Install ytta using helm: `helm install ytta charts/ytta --namespace ytta-prod`
+* Template ytta using helmfile: `helmfile --file applications/ytta/helmfile.yaml template`
+* Install ytta using helmfile: `helmfile --file applications/ytta/helmfile.yaml apply --suppress-secrets`
+* Restart a deployment: `kubectl rollout restart -n ytta-prod deployment api celery-worker ui`
+
+## New instructions
+
+Create namespace
+
+```bash
+kubectl create namespace ytta-prod
+```
+
+Create Fargate profile
+
+```bash
+aws eks create-fargate-profile \
+  --fargate-profile-name ytta-profile \
+  --cluster-name my-cluster \
+  --pod-execution-role-arn "arn:aws:iam::407298002065:role/myAmazonEKSFargatePodExecutionRole" \
+  --subnets "subnet-0a94e6620791955ce" "subnet-0e7c5b86f2f9ca0b6" \
+  --selectors namespace=ytta-prod
+```
+
+Create secret for k8s to access GitLab Container Registry
+
+```bash
+kubectl -n ytta-prod create secret docker-registry registry-credentials \
+  --docker-server=https://registry.gitlab.com \
+  --docker-username=REGISTRY_USERNAME \
+  --docker-password=REGISTRY_PASSWORD
+kubectl -n ytta-prod patch serviceaccount default -p '{"imagePullSecrets": [{"name": "registry-credentials"}]}'
+```
+
+Deploy
+
+```bash
+helmfile --file applications/ytta/helmfile.yaml apply --suppress-secrets
+```

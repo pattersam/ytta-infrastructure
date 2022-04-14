@@ -1,0 +1,4 @@
+apiVersion: v2
+name: ytta
+description: YouTube Tag Analyser
+version: 0.1.0

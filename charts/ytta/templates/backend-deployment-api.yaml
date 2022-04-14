@@ -1,0 +1,29 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Values.apiName | required "apiName required" }}
+  namespace: {{ .Release.Namespace | required "namespace required" }}
+  labels:
+    app: {{ .Values.apiName | required "apiName required" }}
+  creationTimestamp: null
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: {{ .Values.apiName | required "apiName required" }}
+  template:
+    metadata:
+      labels:
+        app: {{ .Values.apiName | required "apiName required" }}
+      creationTimestamp: null
+    spec:
+      containers:
+        - name: {{ .Values.image.name | required "image name required" }}
+          image: "{{ .Values.image.backendRepository }}:{{ .Values.image.tag }}"
+          env:
+          {{- range $key, $val := .Values.env }}
+            - name: {{ $key }}
+              value: {{ required (printf "the %s environment variable is required" $key) $val | quote }}
+          {{- end }}
+          ports:
+            - containerPort: 8000
